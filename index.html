@@ -1,203 +1,484 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Parking System</title>
-  <style>
-    :root { --navy:#10233f; --blue:#2563eb; --cyan:#06b6d4; --bg:#f3f7fc; --green:#15803d; --red:#b91c1c; }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:#172033; }
-    header { background:linear-gradient(120deg,var(--navy),#174b82); color:white; padding:28px 18px; }
-    .wrap { width:min(1100px,94%); margin:auto; }
-    header h1 { margin:0 0 8px; font-size:clamp(1.5rem,3vw,2.25rem); }
-    header p { margin:0; color:#dbeafe; line-height:1.5; }
-    .note { margin:18px 0; padding:12px 14px; background:#fff7d6; border:1px solid #f2d675; border-radius:10px; font-size:.92rem; line-height:1.5; }
-    .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0; }
-    .stat,.panel { background:white; border:1px solid #e0e8f2; border-radius:14px; box-shadow:0 4px 14px #183b5b0b; }
-    .stat { padding:18px; } .stat span { color:#64748b; font-size:.9rem; } .stat strong { display:block; font-size:1.8rem; margin-top:8px; }
-    .layout { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:26px; }
-    .panel { padding:20px; min-width:0; } h2 { margin:0 0 14px; font-size:1.2rem; color:var(--navy); }
-    label { display:block; font-size:.9rem; font-weight:700; margin:12px 0 6px; }
-    input,select { width:100%; padding:11px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; background:white; }
-    button { border:0; border-radius:8px; padding:11px 14px; cursor:pointer; font-weight:700; font-size:.94rem; }
-    .primary { background:var(--blue); color:white; margin-top:14px; width:100%; }
-    .secondary { background:#e7efff; color:#1744a0; }
-    .danger { background:#fee2e2; color:#991b1b; }
-    button:disabled { opacity:.45; cursor:not-allowed; }
-    .space-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
-    .space { border:1px solid #dbe4ef; border-radius:10px; padding:12px; }
-    .space strong { display:block; margin-bottom:5px; }
-    .pill { display:inline-block; font-size:.78rem; font-weight:700; border-radius:20px; padding:4px 8px; }
-    .free { background:#dcfce7; color:var(--green); } .occupied { background:#fee2e2; color:var(--red); }
-    .result { display:none; margin-top:14px; padding:13px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; line-height:1.55; }
-    .result.show { display:block; } .muted { color:#64748b; font-size:.88rem; line-height:1.5; }
-    .actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
-    footer { text-align:center; color:#64748b; font-size:.85rem; padding:0 12px 28px; }
-    @media(max-width:720px) { .layout { grid-template-columns:1fr; } .stats { grid-template-columns:1fr; } .space-list { grid-template-columns:1fr 1fr; } }
-    @media(max-width:400px) { .space-list { grid-template-columns:1fr; } }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ParkSmart - Smart Parking System</title>
+
+<style>
+:root {
+  --navy: #10213d;
+  --blue: #2563eb;
+  --bg: #f1f5fb;
+  --green: #15803d;
+  --red: #b91c1c;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: #172033;
+}
+header {
+  background: linear-gradient(120deg, #0b1730, #194d85);
+  color: white;
+  padding: 30px 5%;
+}
+header h1 { margin: 0 0 10px; font-size: 30px; }
+header p { color: #dbeafe; line-height: 1.5; }
+.container { width: 92%; max-width: 1100px; margin: auto; }
+.notice {
+  background: #fff4cf;
+  padding: 14px;
+  border-radius: 10px;
+  margin: 20px 0;
+  line-height: 1.5;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.stat, .panel {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 5px 20px #14294a0d;
+  border: 1px solid #e1e8f0;
+}
+.stat span { color: #64748b; font-size: 14px; }
+.stat strong { display: block; font-size: 30px; margin-top: 10px; }
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+h2 { color: var(--navy); font-size: 20px; }
+label {
+  display: block;
+  font-weight: bold;
+  margin: 14px 0 7px;
+}
+input, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+}
+button {
+  border: 0;
+  padding: 12px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.primary {
+  background: var(--blue);
+  color: white;
+  width: 100%;
+  margin-top: 16px;
+}
+.secondary { background: #e5edff; color: #1d4ed8; }
+.danger { background: #fee2e2; color: #991b1b; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.result {
+  display: none;
+  margin-top: 15px;
+  padding: 14px;
+  border-radius: 9px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.result.show { display: block; }
+.success { background: #dcfce7; color: #14532d; }
+.info { background: #dbeafe; color: #1e3a8a; }
+.error { background: #fee2e2; color: #991b1b; }
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+.toolbar input { flex: 1; min-width: 180px; }
+.toolbar select { width: auto; }
+.parking-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.space {
+  padding: 15px;
+  border: 1px solid #dbe4ef;
+  border-radius: 12px;
+}
+.space h3 { margin: 0 0 12px; }
+.status {
+  display: inline-block;
+  padding: 6px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+.available { background: #dcfce7; color: var(--green); }
+.occupied { background: #fee2e2; color: var(--red); }
+.space button { width: 100%; margin-top: 12px; }
+.muted { color: #64748b; font-size: 13px; line-height: 1.5; }
+footer { text-align: center; padding: 25px; color: #64748b; }
+@media(max-width: 750px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .layout { grid-template-columns: 1fr; }
+  .parking-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media(max-width: 420px) {
+  .parking-grid { grid-template-columns: 1fr; }
+  header h1 { font-size: 25px; }
+}
+</style>
 </head>
+
 <body>
 <header>
-  <div class="wrap">
-    <h1>Smart Parking Allocation & Navigation</h1>
-    <p>A simple DAA mini-project demo using greedy allocation and Dijkstra's shortest-path algorithm.</p>
+  <div class="container">
+    <h1>🅿 ParkSmart</h1>
+    <p>Smart Parking Allocation & Navigation Optimization System</p>
+    <p>DAA Mini Project | Greedy Algorithm | Dijkstra's Algorithm</p>
   </div>
 </header>
-<main class="wrap">
-  <div class="note"><strong>Demo storage:</strong> This website runs entirely in your browser. It uses in-memory JavaScript data only—no Java backend and no database. Refreshing the page resets the sample data.</div>
-  <section class="stats" aria-label="Parking statistics">
-    <div class="stat"><span>Total spaces</span><strong id="totalCount">6</strong></div>
-    <div class="stat"><span>Available spaces</span><strong id="freeCount">4</strong></div>
-    <div class="stat"><span>Occupied spaces</span><strong id="occupiedCount">2</strong></div>
+
+<main class="container">
+  <div class="notice">
+    <strong>Demo mode:</strong> This website runs entirely in your
+    browser. No Java backend or database is required. Data resets
+    when you refresh the page.
+  </div>
+
+  <section class="stats">
+    <div class="stat"><span>Total Spaces</span><strong id="total">6</strong></div>
+    <div class="stat"><span>Available</span><strong id="free">4</strong></div>
+    <div class="stat"><span>Occupied</span><strong id="busy">2</strong></div>
+    <div class="stat"><span>Occupancy</span><strong id="rate">33%</strong></div>
   </section>
+
   <div class="layout">
     <section class="panel">
-      <h2>Allocate a parking space</h2>
-      <p class="muted">Choose an entry point. The system selects the closest available parking space using the sample road distances.</p>
-      <label for="entryPoint">Vehicle entry point</label>
-      <select id="entryPoint">
-        <option value="Gate A">Gate A</option>
-        <option value="Gate B">Gate B</option>
+      <h2>🚗 Allocate Parking</h2>
+      <p class="muted">Automatically find the nearest available
+      parking space from your entry gate.</p>
+
+      <label for="gate">Entry Gate</label>
+      <select id="gate">
+        <option>Gate A</option>
+        <option>Gate B</option>
       </select>
-      <label for="vehicleNumber">Vehicle number (optional)</label>
-      <input id="vehicleNumber" placeholder="e.g. TN 01 AB 1234" maxlength="20">
-      <button class="primary" id="allocateBtn">Find and allocate nearest space</button>
-      <div id="allocationResult" class="result" role="status" aria-live="polite"></div>
-      <div class="actions">
-        <button class="secondary" id="resetBtn">Reset demo data</button>
-      </div>
+
+      <label for="vehicle">Vehicle Number</label>
+      <input id="vehicle" maxlength="20"
+        placeholder="Example: TN 01 AB 1234">
+
+      <button class="primary" id="allocate">
+        Find Nearest Parking Space
+      </button>
+      <div id="allocationResult" class="result" role="status"></div>
     </section>
+
     <section class="panel">
-      <h2>Find a route</h2>
-      <p class="muted">Dijkstra's algorithm finds the shortest route in the sample graph. Route lengths are illustrative demo values.</p>
-      <label for="routeStart">Start</label>
-      <select id="routeStart">
-        <option>Gate A</option><option>Gate B</option><option>Junction 1</option><option>Junction 2</option>
+      <h2>🧭 Route Navigator</h2>
+      <p class="muted">Calculate the shortest route using
+      Dijkstra's algorithm.</p>
+
+      <label for="start">Starting Point</label>
+      <select id="start">
+        <option>Gate A</option>
+        <option>Gate B</option>
+        <option>Junction 1</option>
+        <option>Junction 2</option>
       </select>
-      <label for="routeEnd">Destination</label>
-      <select id="routeEnd">
-        <option>Parking P1</option><option>Parking P2</option><option>Parking P3</option><option>Parking P4</option><option>Parking P5</option><option>Parking P6</option>
+
+      <label for="destination">Destination</label>
+      <select id="destination">
+        <option>Parking P1</option>
+        <option>Parking P2</option>
+        <option>Parking P3</option>
+        <option>Parking P4</option>
+        <option>Parking P5</option>
+        <option>Parking P6</option>
       </select>
-      <button class="primary" id="routeBtn">Calculate shortest route</button>
-      <div id="routeResult" class="result" role="status" aria-live="polite"></div>
+
+      <button class="primary" id="findRoute">
+        Calculate Shortest Route
+      </button>
+      <div id="routeResult" class="result" role="status"></div>
     </section>
   </div>
-  <section class="panel" style="margin-bottom:24px">
-    <h2>Parking space status</h2>
-    <div id="spaceList" class="space-list"></div>
-    <p class="muted" style="margin-bottom:0">Use the “Release” button to mark an occupied space as available. All changes are temporary and held only in this page's memory.</p>
+
+  <section class="panel" style="margin-top:20px">
+    <h2>🅿 Parking Space Overview</h2>
+    <p class="muted">Search parking spaces, filter by status,
+    and release occupied spaces.</p>
+
+    <div class="toolbar">
+      <input id="search" placeholder="Search space or vehicle...">
+      <select id="filter">
+        <option value="all">All Spaces</option>
+        <option value="free">Available Only</option>
+        <option value="occupied">Occupied Only</option>
+      </select>
+      <button class="secondary" id="reset">Reset Demo</button>
+    </div>
+
+    <div id="parkingGrid" class="parking-grid"></div>
   </section>
 </main>
-<footer>Smart Parking DAA Mini Project · Static GitHub Pages version · No database</footer>
+
+<footer>
+  ParkSmart | DAA Mini Project | GitHub Pages Edition
+</footer>
+
 <script>
-  // All state is in memory. Refreshing the page restores these initial values.
-  const initialSpaces = [
-    { id:"P1", name:"Parking P1", node:"Parking P1", occupied:false },
-    { id:"P2", name:"Parking P2", node:"Parking P2", occupied:false },
-    { id:"P3", name:"Parking P3", node:"Parking P3", occupied:true },
-    { id:"P4", name:"Parking P4", node:"Parking P4", occupied:false },
-    { id:"P5", name:"Parking P5", node:"Parking P5", occupied:true },
-    { id:"P6", name:"Parking P6", node:"Parking P6", occupied:false }
-  ];
-  let spaces = initialSpaces.map(s => ({...s}));
-  let assignments = {};
+"use strict";
 
-  // Undirected weighted graph: edge weights represent illustrative distance units.
-  const graph = {
-    "Gate A": {"Junction 1":2, "Junction 2":5},
-    "Gate B": {"Junction 1":4, "Junction 2":2},
-    "Junction 1": {"Gate A":2, "Gate B":4, "Junction 2":1, "Parking P1":3, "Parking P2":4, "Parking P3":6},
-    "Junction 2": {"Gate A":5, "Gate B":2, "Junction 1":1, "Parking P4":2, "Parking P5":3, "Parking P6":4},
-    "Parking P1": {"Junction 1":3}, "Parking P2": {"Junction 1":4},
-    "Parking P3": {"Junction 1":6}, "Parking P4": {"Junction 2":2},
-    "Parking P5": {"Junction 2":3}, "Parking P6": {"Junction 2":4}
-  };
+// Temporary in-memory parking data.
+// Refreshing this page restores the initial values.
+const initialSpaces = [
+  {id:"P1", node:"Parking P1", occupied:false},
+  {id:"P2", node:"Parking P2", occupied:false},
+  {id:"P3", node:"Parking P3", occupied:true, vehicle:"Demo vehicle"},
+  {id:"P4", node:"Parking P4", occupied:false},
+  {id:"P5", node:"Parking P5", occupied:true, vehicle:"Demo vehicle"},
+  {id:"P6", node:"Parking P6", occupied:false}
+];
 
-  function dijkstra(start, end) {
-    const nodes = Object.keys(graph);
-    const dist = Object.fromEntries(nodes.map(n => [n, Infinity]));
-    const previous = {};
-    const unvisited = new Set(nodes);
-    if (!(start in graph) || !(end in graph)) return null;
-    dist[start] = 0;
-    while (unvisited.size) {
-      let current = null;
-      for (const n of unvisited) if (current === null || dist[n] < dist[current]) current = n;
-      if (current === null || dist[current] === Infinity) break;
-      if (current === end) break;
-      unvisited.delete(current);
-      for (const [neighbor, weight] of Object.entries(graph[current])) {
-        if (!unvisited.has(neighbor)) continue;
-        const candidate = dist[current] + weight;
-        if (candidate < dist[neighbor]) { dist[neighbor] = candidate; previous[neighbor] = current; }
+let spaces = initialSpaces.map(s => ({...s}));
+
+// Undirected graph. Edge weights are sample distance units.
+const graph = {
+  "Gate A": {"Junction 1":2, "Junction 2":5},
+  "Gate B": {"Junction 1":4, "Junction 2":2},
+  "Junction 1": {
+    "Gate A":2, "Gate B":4, "Junction 2":1,
+    "Parking P1":3, "Parking P2":4, "Parking P3":6
+  },
+  "Junction 2": {
+    "Gate A":5, "Gate B":2, "Junction 1":1,
+    "Parking P4":2, "Parking P5":3, "Parking P6":4
+  },
+  "Parking P1":{"Junction 1":3},
+  "Parking P2":{"Junction 1":4},
+  "Parking P3":{"Junction 1":6},
+  "Parking P4":{"Junction 2":2},
+  "Parking P5":{"Junction 2":3},
+  "Parking P6":{"Junction 2":4}
+};
+
+const $ = id => document.getElementById(id);
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#39;"
+  })[c]);
+}
+
+// Dijkstra's shortest-path algorithm.
+// Time: O(V^2 + E) for this implementation.
+function dijkstra(source, target) {
+  if (!(source in graph) || !(target in graph)) return null;
+
+  const nodes = Object.keys(graph);
+  const dist = Object.fromEntries(nodes.map(n => [n, Infinity]));
+  const previous = {};
+  const remaining = new Set(nodes);
+  dist[source] = 0;
+
+  while (remaining.size) {
+    let current = null;
+
+    for (const node of remaining) {
+      if (current === null || dist[node] < dist[current]) {
+        current = node;
       }
     }
-    if (dist[end] === Infinity) return null;
-    const path = []; let node = end;
-    while (node) { path.unshift(node); if (node === start) break; node = previous[node]; }
-    return {distance:dist[end], path};
+
+    if (current === null || dist[current] === Infinity) break;
+    remaining.delete(current);
+
+    if (current === target) break;
+
+    for (const [next, weight] of Object.entries(graph[current])) {
+      if (!remaining.has(next)) continue;
+
+      const candidate = dist[current] + weight;
+      if (candidate < dist[next]) {
+        dist[next] = candidate;
+        previous[next] = current;
+      }
+    }
   }
 
-  function renderSpaces() {
-    document.getElementById("totalCount").textContent = spaces.length;
-    document.getElementById("freeCount").textContent = spaces.filter(s => !s.occupied).length;
-    document.getElementById("occupiedCount").textContent = spaces.filter(s => s.occupied).length;
-    document.getElementById("spaceList").innerHTML = spaces.map(s => `
-      <article class="space">
-        <strong>${s.name}</strong>
-        <span class="pill ${s.occupied ? "occupied" : "free"}">${s.occupied ? "Occupied" : "Available"}</span>
-        ${assignments[s.id] ? `<p class="muted">Vehicle: ${escapeHtml(assignments[s.id])}</p>` : ""}
-        ${s.occupied ? `<div class="actions"><button class="secondary" data-release="${s.id}">Release</button></div>` : ""}
-      </article>`).join("");
-    document.querySelectorAll("[data-release]").forEach(btn => btn.addEventListener("click", () => {
-      const id = btn.getAttribute("data-release");
-      const space = spaces.find(s => s.id === id);
-      if (space) { space.occupied = false; delete assignments[id]; renderSpaces(); }
-    }));
-    document.getElementById("allocateBtn").disabled = spaces.every(s => s.occupied);
+  if (!Number.isFinite(dist[target])) return null;
+
+  const path = [];
+  let node = target;
+
+  while (node !== undefined) {
+    path.unshift(node);
+    if (node === source) break;
+    node = previous[node];
   }
-  function escapeHtml(value) {
-    return String(value).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+
+  if (path[0] !== source) return null;
+  return {distance:dist[target], path};
+}
+
+function showResult(id, type, html) {
+  $(id).className = "result show " + type;
+  $(id).innerHTML = html;
+}
+
+function render() {
+  const free = spaces.filter(s => !s.occupied).length;
+  const busy = spaces.length - free;
+
+  $("total").textContent = spaces.length;
+  $("free").textContent = free;
+  $("busy").textContent = busy;
+  $("rate").textContent =
+    Math.round(busy / spaces.length * 100) + "%";
+
+  $("allocate").disabled = free === 0;
+
+  const query = $("search").value.trim().toLowerCase();
+  const filter = $("filter").value;
+
+  const visible = spaces.filter(s => {
+    const matchesText =
+      s.id.toLowerCase().includes(query) ||
+      (s.vehicle || "").toLowerCase().includes(query);
+
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "free" && !s.occupied) ||
+      (filter === "occupied" && s.occupied);
+
+    return matchesText && matchesFilter;
+  });
+
+  if (!visible.length) {
+    $("parkingGrid").innerHTML =
+      '<p class="muted">No matching parking spaces found.</p>';
+    return;
   }
-  document.getElementById("allocateBtn").addEventListener("click", () => {
-    const start = document.getElementById("entryPoint").value;
-    const vehicle = document.getElementById("vehicleNumber").value.trim();
-    const freeSpaces = spaces.filter(s => !s.occupied);
-    const choices = freeSpaces.map(s => ({space:s, route:dijkstra(start, s.node)})).filter(x => x.route);
-    choices.sort((a,b) => a.route.distance - b.route.distance);
-    const output = document.getElementById("allocationResult");
-    output.classList.add("show");
-    if (!choices.length) {
-      output.textContent = "Sorry, all parking spaces are occupied.";
-      return;
-    }
-    const best = choices[0];
-    best.space.occupied = true;
-    assignments[best.space.id] = vehicle || "Demo vehicle";
-    output.innerHTML = `<strong>Allocated: ${best.space.name}</strong><br>Shortest distance: ${best.route.distance} units<br>Route: ${best.route.path.map(escapeHtml).join(" → ")}<br>Vehicle: ${escapeHtml(assignments[best.space.id])}`;
-    renderSpaces();
+
+  $("parkingGrid").innerHTML = visible.map(s => `
+    <article class="space">
+      <h3>🅿 ${escapeHTML(s.id)}</h3>
+      <span class="status ${s.occupied ? "occupied" : "available"}">
+        ${s.occupied ? "Occupied" : "Available"}
+      </span>
+      <p class="muted">
+        ${s.occupied
+          ? "Vehicle: " + escapeHTML(s.vehicle || "Demo vehicle")
+          : "Ready for allocation"}
+      </p>
+      ${s.occupied
+        ? `<button class="secondary" data-release="${s.id}">
+             Release Space
+           </button>`
+        : '<button class="secondary" disabled>Available</button>'}
+    </article>
+  `).join("");
+
+  $("parkingGrid").querySelectorAll("[data-release]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const space = spaces.find(s => s.id === btn.dataset.release);
+      if (space) {
+        space.occupied = false;
+        delete space.vehicle;
+        render();
+      }
+    });
   });
-  document.getElementById("routeBtn").addEventListener("click", () => {
-    const start = document.getElementById("routeStart").value;
-    const end = document.getElementById("routeEnd").value;
-    const route = dijkstra(start, end);
-    const output = document.getElementById("routeResult");
-    output.classList.add("show");
-    output.innerHTML = route
-      ? `<strong>Shortest route found</strong><br>Route: ${route.path.map(escapeHtml).join(" → ")}<br>Total distance: ${route.distance} units`
-      : "No route was found between those points.";
-  });
-  document.getElementById("resetBtn").addEventListener("click", () => {
-    spaces = initialSpaces.map(s => ({...s}));
-    assignments = {};
-    document.getElementById("allocationResult").classList.remove("show");
-    document.getElementById("routeResult").classList.remove("show");
-    document.getElementById("vehicleNumber").value = "";
-    renderSpaces();
-  });
-  renderSpaces();
+}
+
+// Greedy allocation: choose the reachable free space
+// with the minimum shortest-route distance.
+$("allocate").addEventListener("click", () => {
+  const gate = $("gate").value;
+  const vehicle = $("vehicle").value.trim().toUpperCase();
+
+  if (vehicle && !/^[A-Z0-9 -]{2,20}$/.test(vehicle)) {
+    showResult("allocationResult", "error",
+      "<strong>Invalid vehicle number.</strong><br>" +
+      "Use letters, numbers, spaces, or hyphens.");
+    return;
+  }
+
+  const choices = spaces
+    .filter(s => !s.occupied)
+    .map(s => ({space:s, route:dijkstra(gate, s.node)}))
+    .filter(x => x.route)
+    .sort((a,b) =>
+      a.route.distance - b.route.distance ||
+      a.space.id.localeCompare(b.space.id)
+    );
+
+  if (!choices.length) {
+    showResult("allocationResult", "error",
+      "<strong>No spaces available.</strong>");
+    return;
+  }
+
+  const best = choices[0];
+  best.space.occupied = true;
+  best.space.vehicle = vehicle || "Demo vehicle";
+
+  showResult("allocationResult", "success",
+    `<strong>Space ${escapeHTML(best.space.id)} allocated!</strong><br>
+     Vehicle: ${escapeHTML(best.space.vehicle)}<br>
+     Distance: ${best.route.distance} units<br>
+     Route: ${best.route.path.map(escapeHTML).join(" → ")}`);
+
+  $("vehicle").value = "";
+  $("start").value = gate;
+  $("destination").value = best.space.node;
+  render();
+});
+
+// Shortest route finder.
+$("findRoute").addEventListener("click", () => {
+  const route = dijkstra($("start").value, $("destination").value);
+
+  if (!route) {
+    showResult("routeResult", "error", "No route found.");
+    return;
+  }
+
+  showResult("routeResult", "info",
+    `<strong>Shortest route found</strong><br>
+     Distance: ${route.distance} units<br>
+     Route: ${route.path.map(escapeHTML).join(" → ")}`);
+});
+
+// Search and filtering.
+$("search").addEventListener("input", render);
+$("filter").addEventListener("change", render);
+
+// Restore the original demonstration state.
+$("reset").addEventListener("click", () => {
+  spaces = initialSpaces.map(s => ({...s}));
+  $("search").value = "";
+  $("filter").value = "all";
+  $("vehicle").value = "";
+  $("allocationResult").className = "result";
+  $("routeResult").className = "result";
+  render();
+});
+
+render();
 </script>
 </body>
 </html>
