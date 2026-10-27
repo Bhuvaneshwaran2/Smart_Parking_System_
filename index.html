@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Parking System</title>
+  <style>
+    :root { --navy:#10233f; --blue:#2563eb; --cyan:#06b6d4; --bg:#f3f7fc; --green:#15803d; --red:#b91c1c; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:#172033; }
+    header { background:linear-gradient(120deg,var(--navy),#174b82); color:white; padding:28px 18px; }
+    .wrap { width:min(1100px,94%); margin:auto; }
+    header h1 { margin:0 0 8px; font-size:clamp(1.5rem,3vw,2.25rem); }
+    header p { margin:0; color:#dbeafe; line-height:1.5; }
+    .note { margin:18px 0; padding:12px 14px; background:#fff7d6; border:1px solid #f2d675; border-radius:10px; font-size:.92rem; line-height:1.5; }
+    .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0; }
+    .stat,.panel { background:white; border:1px solid #e0e8f2; border-radius:14px; box-shadow:0 4px 14px #183b5b0b; }
+    .stat { padding:18px; } .stat span { color:#64748b; font-size:.9rem; } .stat strong { display:block; font-size:1.8rem; margin-top:8px; }
+    .layout { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:26px; }
+    .panel { padding:20px; min-width:0; } h2 { margin:0 0 14px; font-size:1.2rem; color:var(--navy); }
+    label { display:block; font-size:.9rem; font-weight:700; margin:12px 0 6px; }
+    input,select { width:100%; padding:11px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; background:white; }
+    button { border:0; border-radius:8px; padding:11px 14px; cursor:pointer; font-weight:700; font-size:.94rem; }
+    .primary { background:var(--blue); color:white; margin-top:14px; width:100%; }
+    .secondary { background:#e7efff; color:#1744a0; }
+    .danger { background:#fee2e2; color:#991b1b; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+    .space-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .space { border:1px solid #dbe4ef; border-radius:10px; padding:12px; }
+    .space strong { display:block; margin-bottom:5px; }
+    .pill { display:inline-block; font-size:.78rem; font-weight:700; border-radius:20px; padding:4px 8px; }
+    .free { background:#dcfce7; color:var(--green); } .occupied { background:#fee2e2; color:var(--red); }
+    .result { display:none; margin-top:14px; padding:13px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; line-height:1.55; }
+    .result.show { display:block; } .muted { color:#64748b; font-size:.88rem; line-height:1.5; }
+    .actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    footer { text-align:center; color:#64748b; font-size:.85rem; padding:0 12px 28px; }
+    @media(max-width:720px) { .layout { grid-template-columns:1fr; } .stats { grid-template-columns:1fr; } .space-list { grid-template-columns:1fr 1fr; } }
+    @media(max-width:400px) { .space-list { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Smart Parking Allocation & Navigation</h1>
+    <p>A simple DAA mini-project demo using greedy allocation and Dijkstra's shortest-path algorithm.</p>
+  </div>
+</header>
+<main class="wrap">
+  <div class="note"><strong>Demo storage:</strong> This website runs entirely in your browser. It uses in-memory JavaScript data only—no Java backend and no database. Refreshing the page resets the sample data.</div>
+  <section class="stats" aria-label="Parking statistics">
+    <div class="stat"><span>Total spaces</span><strong id="totalCount">6</strong></div>
+    <div class="stat"><span>Available spaces</span><strong id="freeCount">4</strong></div>
+    <div class="stat"><span>Occupied spaces</span><strong id="occupiedCount">2</strong></div>
+  </section>
+  <div class="layout">
+    <section class="panel">
+      <h2>Allocate a parking space</h2>
+      <p class="muted">Choose an entry point. The system selects the closest available parking space using the sample road distances.</p>
+      <label for="entryPoint">Vehicle entry point</label>
+      <select id="entryPoint">
+        <option value="Gate A">Gate A</option>
+        <option value="Gate B">Gate B</option>
+      </select>
+      <label for="vehicleNumber">Vehicle number (optional)</label>
+      <input id="vehicleNumber" placeholder="e.g. TN 01 AB 1234" maxlength="20">
+      <button class="primary" id="allocateBtn">Find and allocate nearest space</button>
+      <div id="allocationResult" class="result" role="status" aria-live="polite"></div>
+      <div class="actions">
+        <button class="secondary" id="resetBtn">Reset demo data</button>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Find a route</h2>
+      <p class="muted">Dijkstra's algorithm finds the shortest route in the sample graph. Route lengths are illustrative demo values.</p>
+      <label for="routeStart">Start</label>
+      <select id="routeStart">
+        <option>Gate A</option><option>Gate B</option><option>Junction 1</option><option>Junction 2</option>
+      </select>
+      <label for="routeEnd">Destination</label>
+      <select id="routeEnd">
+        <option>Parking P1</option><option>Parking P2</option><option>Parking P3</option><option>Parking P4</option><option>Parking P5</option><option>Parking P6</option>
+      </select>
+      <button class="primary" id="routeBtn">Calculate shortest route</button>
+      <div id="routeResult" class="result" role="status" aria-live="polite"></div>
+    </section>
+  </div>
+  <section class="panel" style="margin-bottom:24px">
+    <h2>Parking space status</h2>
+    <div id="spaceList" class="space-list"></div>
+    <p class="muted" style="margin-bottom:0">Use the “Release” button to mark an occupied space as available. All changes are temporary and held only in this page's memory.</p>
+  </section>
+</main>
+<footer>Smart Parking DAA Mini Project · Static GitHub Pages version · No database</footer>
+<script>
+  // All state is in memory. Refreshing the page restores these initial values.
+  const initialSpaces = [
+    { id:"P1", name:"Parking P1", node:"Parking P1", occupied:false },
+    { id:"P2", name:"Parking P2", node:"Parking P2", occupied:false },
+    { id:"P3", name:"Parking P3", node:"Parking P3", occupied:true },
+    { id:"P4", name:"Parking P4", node:"Parking P4", occupied:false },
+    { id:"P5", name:"Parking P5", node:"Parking P5", occupied:true },
+    { id:"P6", name:"Parking P6", node:"Parking P6", occupied:false }
+  ];
+  let spaces = initialSpaces.map(s => ({...s}));
+  let assignments = {};
+
+  // Undirected weighted graph: edge weights represent illustrative distance units.
+  const graph = {
+    "Gate A": {"Junction 1":2, "Junction 2":5},
+    "Gate B": {"Junction 1":4, "Junction 2":2},
+    "Junction 1": {"Gate A":2, "Gate B":4, "Junction 2":1, "Parking P1":3, "Parking P2":4, "Parking P3":6},
+    "Junction 2": {"Gate A":5, "Gate B":2, "Junction 1":1, "Parking P4":2, "Parking P5":3, "Parking P6":4},
+    "Parking P1": {"Junction 1":3}, "Parking P2": {"Junction 1":4},
+    "Parking P3": {"Junction 1":6}, "Parking P4": {"Junction 2":2},
+    "Parking P5": {"Junction 2":3}, "Parking P6": {"Junction 2":4}
+  };
+
+  function dijkstra(start, end) {
+    const nodes = Object.keys(graph);
+    const dist = Object.fromEntries(nodes.map(n => [n, Infinity]));
+    const previous = {};
+    const unvisited = new Set(nodes);
+    if (!(start in graph) || !(end in graph)) return null;
+    dist[start] = 0;
+    while (unvisited.size) {
+      let current = null;
+      for (const n of unvisited) if (current === null || dist[n] < dist[current]) current = n;
+      if (current === null || dist[current] === Infinity) break;
+      if (current === end) break;
+      unvisited.delete(current);
+      for (const [neighbor, weight] of Object.entries(graph[current])) {
+        if (!unvisited.has(neighbor)) continue;
+        const candidate = dist[current] + weight;
+        if (candidate < dist[neighbor]) { dist[neighbor] = candidate; previous[neighbor] = current; }
+      }
+    }
+    if (dist[end] === Infinity) return null;
+    const path = []; let node = end;
+    while (node) { path.unshift(node); if (node === start) break; node = previous[node]; }
+    return {distance:dist[end], path};
+  }
+
+  function renderSpaces() {
+    document.getElementById("totalCount").textContent = spaces.length;
+    document.getElementById("freeCount").textContent = spaces.filter(s => !s.occupied).length;
+    document.getElementById("occupiedCount").textContent = spaces.filter(s => s.occupied).length;
+    document.getElementById("spaceList").innerHTML = spaces.map(s => `
+      <article class="space">
+        <strong>${s.name}</strong>
+        <span class="pill ${s.occupied ? "occupied" : "free"}">${s.occupied ? "Occupied" : "Available"}</span>
+        ${assignments[s.id] ? `<p class="muted">Vehicle: ${escapeHtml(assignments[s.id])}</p>` : ""}
+        ${s.occupied ? `<div class="actions"><button class="secondary" data-release="${s.id}">Release</button></div>` : ""}
+      </article>`).join("");
+    document.querySelectorAll("[data-release]").forEach(btn => btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-release");
+      const space = spaces.find(s => s.id === id);
+      if (space) { space.occupied = false; delete assignments[id]; renderSpaces(); }
+    }));
+    document.getElementById("allocateBtn").disabled = spaces.every(s => s.occupied);
+  }
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  }
+  document.getElementById("allocateBtn").addEventListener("click", () => {
+    const start = document.getElementById("entryPoint").value;
+    const vehicle = document.getElementById("vehicleNumber").value.trim();
+    const freeSpaces = spaces.filter(s => !s.occupied);
+    const choices = freeSpaces.map(s => ({space:s, route:dijkstra(start, s.node)})).filter(x => x.route);
+    choices.sort((a,b) => a.route.distance - b.route.distance);
+    const output = document.getElementById("allocationResult");
+    output.classList.add("show");
+    if (!choices.length) {
+      output.textContent = "Sorry, all parking spaces are occupied.";
+      return;
+    }
+    const best = choices[0];
+    best.space.occupied = true;
+    assignments[best.space.id] = vehicle || "Demo vehicle";
+    output.innerHTML = `<strong>Allocated: ${best.space.name}</strong><br>Shortest distance: ${best.route.distance} units<br>Route: ${best.route.path.map(escapeHtml).join(" → ")}<br>Vehicle: ${escapeHtml(assignments[best.space.id])}`;
+    renderSpaces();
+  });
+  document.getElementById("routeBtn").addEventListener("click", () => {
+    const start = document.getElementById("routeStart").value;
+    const end = document.getElementById("routeEnd").value;
+    const route = dijkstra(start, end);
+    const output = document.getElementById("routeResult");
+    output.classList.add("show");
+    output.innerHTML = route
+      ? `<strong>Shortest route found</strong><br>Route: ${route.path.map(escapeHtml).join(" → ")}<br>Total distance: ${route.distance} units`
+      : "No route was found between those points.";
+  });
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    spaces = initialSpaces.map(s => ({...s}));
+    assignments = {};
+    document.getElementById("allocationResult").classList.remove("show");
+    document.getElementById("routeResult").classList.remove("show");
+    document.getElementById("vehicleNumber").value = "";
+    renderSpaces();
+  });
+  renderSpaces();
+</script>
+</body>
+</html>
